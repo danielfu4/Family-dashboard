@@ -1350,16 +1350,20 @@
   function computeOffsets(){
     var phone = document.querySelector(".phone");
     var art = document.getElementById("seasonArt");
-    var phoneH = phone.clientHeight;
-
-    // Expanded position: sheet top rises just above the greeting, covering it
     var greeting = document.getElementById("greetingText");
-    var topPanel = document.querySelector(".top-panel");
-    var fullTop = greeting
-      ? topPanel.offsetTop + greeting.offsetTop
-      : art.offsetTop;
-    // Peek position: sheet top sits just below the trunk, matching the design gap
-    var peekTop = art.offsetTop + art.offsetHeight + 16;
+    var phoneH = phone.clientHeight;
+    var phoneTop = phone.getBoundingClientRect().top;
+
+    // Measure against the phone frame's real screen position, so the result
+    // doesn't depend on which ancestor each element is positioned against
+    function offsetIn(el){
+      return el.getBoundingClientRect().top - phoneTop;
+    }
+
+    // Expanded: sheet top rises just above the greeting so it covers it
+    var fullTop = greeting ? Math.max(0, offsetIn(greeting) - 12) : offsetIn(art);
+    // Collapsed: sheet top sits just below the trunk
+    var peekTop = offsetIn(art) + art.offsetHeight + 16;
 
     // Sheet is tall enough to reach the bottom of the screen when expanded
     sheet.style.top = fullTop + "px";
