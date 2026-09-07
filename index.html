@@ -308,63 +308,108 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: var(--radius-xl);
-    padding: 22px 24px 24px;
+    padding: 22px 0 18px;
     margin-bottom: 14px;
+    overflow:hidden;
   }
-  .goal-head{ display:flex; justify-content:space-between; align-items:flex-start; }
-  .goal-head h2{ margin:0; font-size:19px; font-weight:700; }
-  .goal-head p{ margin:4px 0 0; font-size:12.5px; color: var(--ink-soft); }
+  .goal-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding: 0 24px;
+  }
+  .goal-head h2{ margin:0; font-size:20px; font-weight:700; letter-spacing:.5px; }
+  .goal-head p{ margin:6px 0 0; font-size:13px; color: var(--ink-soft); }
   .pill-btn{
-    border:1px solid var(--ink-faint);
+    border:1px solid #dcdad8;
     background:transparent;
     color: var(--ink);
     font-family: var(--font-han);
-    font-size:12.5px;
-    font-weight:600;
-    padding:7px 14px;
+    font-size:13px;
+    font-weight:500;
+    padding:9px 18px;
     border-radius: var(--radius-pill);
     white-space:nowrap;
   }
   .pill-btn:active{ background: var(--bg); }
 
+  /* Lighter band that runs the full width of the card */
+  .goal-panel{
+    margin-top:16px;
+    padding: 14px 24px 18px;
+    background: rgba(255,255,255,.78);
+  }
+
   .goal-numbers{
     display:flex; justify-content:space-between; align-items:baseline;
-    margin-top:18px; font-family: var(--font-latin);
+    font-family: var(--font-latin);
   }
-  .goal-numbers #goalCurrent{ font-size:26px; font-weight:700; }
-  .goal-numbers #goalPercent{ font-size:22px; font-weight:600; color: var(--ink-soft); }
+  .goal-amounts{ display:flex; align-items:baseline; gap:8px; }
+  #goalCurrent{ font-size:28px; font-weight:600; letter-spacing:-.5px; }
+  #goalCurrent .cur-sym{ font-size:20px; font-weight:600; }
+  #goalTarget{ font-size:20px; font-weight:400; color: var(--ink-soft); }
+  #goalPercent{ font-size:28px; font-weight:600; color: var(--ink); letter-spacing:-.5px; }
+
+  .goal-scale{
+    display:flex; justify-content:space-between;
+    margin-top:12px;
+    font-family: var(--font-latin);
+    font-size:13px;
+    color: var(--ink-faint);
+  }
 
   .progress-track{
     position:relative;
-    margin-top:10px;
-    height:10px;
-    border-radius: var(--radius-pill);
-    background: #eeece8;
-    overflow:visible;
+    margin-top:6px;
+    height:24px;
   }
-  .progress-fill{
-    height:100%;
+  .progress-seg{
+    position:absolute; top:0; bottom:0;
     border-radius: var(--radius-pill);
-    background: linear-gradient(90deg,#3d8bff, #8fe36a);
-    width:0%;
-    transition: width .5s ease;
+    transition: left .5s ease, width .5s ease;
   }
   .progress-marker{
-    position:absolute; top:-4px;
-    width:2px; height:18px; background: var(--ink);
-    opacity:.35; left:0%;
+    position:absolute;
+    top:-9px; bottom:-3px;
+    width:1.5px;
+    background: #b9b7b5;
+    transform: translateX(-50%);
+    transition: left .5s ease;
   }
   .progress-marker::after{
     content:"";
-    position:absolute; top:-6px; left:50%; transform:translateX(-50%);
-    border-left:4px solid transparent; border-right:4px solid transparent;
-    border-top:5px solid var(--ink); opacity:.6;
+    position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+    border-left:6px solid transparent; border-right:6px solid transparent;
+    border-top:7px solid #8b8b90;
   }
 
-  .goal-edit{ margin-top:16px; display:none; flex-direction:column; gap:10px; }
-  .goal-edit.open{ display:flex; }
-  .goal-edit input{
-    border:1px solid var(--ink-faint); border-radius: var(--radius-md);
+  .goal-edit{
+    margin: 0 24px;
+    margin-top: 0;
+    display:flex; flex-direction:column; gap:10px;
+    height:0;
+    opacity:0;
+    overflow:hidden;
+    /* closing: fade out first, then let the cards below slide back up */
+    transition: opacity .18s ease 0s,
+                height .3s cubic-bezier(.22,.9,.35,1) .18s,
+                margin-top .3s cubic-bezier(.22,.9,.35,1) .18s;
+  }
+  .goal-edit.open{
+    opacity:1;
+    margin-top:16px;
+    /* opening: push the cards down first, then fade the form in */
+    transition: height .3s cubic-bezier(.22,.9,.35,1) 0s,
+                margin-top .3s cubic-bezier(.22,.9,.35,1) 0s,
+                opacity .22s ease .26s;
+  }
+  .detail-bar{
+    height:10px; border-radius: var(--radius-pill);
+    background:#eeece8; margin-bottom:18px; overflow:hidden;
+  }
+  .detail-bar-fill{
+    height:100%; border-radius: var(--radius-pill);
+    background: linear-gradient(90deg,#55aee3,#92e188);
+  }
+  .goal-edit input{    border:1px solid var(--ink-faint); border-radius: var(--radius-md);
     padding:10px 14px; font-family: var(--font-han); font-size:14px; background:var(--bg);
   }
   .goal-edit-actions{ display:flex; gap:8px; justify-content:flex-end; }
@@ -573,13 +618,20 @@
           </div>
           <button class="pill-btn" id="editGoalBtn">設定任務</button>
         </div>
-        <div class="goal-numbers">
-          <span id="goalCurrent">$0</span>
-          <span id="goalPercent">0%</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="goalFill"></div>
-          <div class="progress-marker" id="goalMarker"></div>
+        <div class="goal-panel">
+          <div class="goal-numbers">
+            <span class="goal-amounts">
+              <span id="goalCurrent"><span class="cur-sym">$</span>0</span>
+              <span id="goalTarget">/ $0</span>
+            </span>
+            <span id="goalPercent">0%</span>
+          </div>
+          <div class="goal-scale"><span>0%</span><span>100%</span></div>
+          <div class="progress-track">
+            <div class="progress-seg" id="goalFill"></div>
+            <div class="progress-seg" id="goalRest"></div>
+            <div class="progress-marker" id="goalMarker"></div>
+          </div>
         </div>
 
         <div class="goal-edit" id="goalEdit">
@@ -945,6 +997,18 @@
     investEl.className = "info-card-value " + (gain >= 0 ? "gain" : "loss");
   }
 
+  /* Bar colour ramps from blue at 0% to green at 100%; sampling the ramp at the
+     split point keeps the two segments reading as one continuous gradient. */
+  var BAR_START = [0x55, 0xAE, 0xE3];
+  var BAR_END   = [0x92, 0xE1, 0x88];
+  function barColor(ratio){
+    ratio = Math.max(0, Math.min(1, ratio));
+    var c = BAR_START.map(function(v, i){
+      return Math.round(v + (BAR_END[i] - v) * ratio);
+    });
+    return "rgb(" + c.join(",") + ")";
+  }
+
   function renderGoal(){
     var g = state.goal;
     document.getElementById("goalTitle").textContent = g.name;
@@ -952,12 +1016,32 @@
     var lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
     var daysLeft = lastDay - now.getDate();
     document.getElementById("goalSub").textContent = "距離月底還有 " + daysLeft + " 天";
-    document.getElementById("goalCurrent").textContent = money(g.current) + " / " + money(g.target);
+
+    document.getElementById("goalCurrent").innerHTML =
+      '<span class="cur-sym">$</span>' + money(g.current).replace("$", "");
+    document.getElementById("goalTarget").textContent = "/ " + money(g.target);
+
     var pct = g.target > 0 ? Math.min(999, Math.round((g.current/g.target)*100)) : 0;
     document.getElementById("goalPercent").textContent = pct + "%";
-    document.getElementById("goalFill").style.width = Math.min(100, pct) + "%";
-    var timePct = (now.getDate() / lastDay) * 100;
-    document.getElementById("goalMarker").style.left = timePct + "%";
+
+    var p = Math.max(0, Math.min(100, pct));
+    var gapPx = 6;
+    var fill = document.getElementById("goalFill");
+    var rest = document.getElementById("goalRest");
+    var midColor = barColor(p/100);
+
+    fill.style.left = "0";
+    fill.style.width = "calc(" + p + "% - " + gapPx + "px)";
+    fill.style.background = "linear-gradient(90deg," + barColor(0) + "," + midColor + ")";
+
+    rest.style.left = "calc(" + p + "% + " + gapPx + "px)";
+    rest.style.width = "calc(" + (100 - p) + "% - " + gapPx + "px)";
+    rest.style.background = "linear-gradient(90deg," + midColor + "," + barColor(1) + ")";
+
+    var marker = document.getElementById("goalMarker");
+    marker.style.left = p + "%";
+    // At the very ends the marker just collides with the 0% / 100% labels
+    marker.style.display = (p <= 0 || p >= 100) ? "none" : "block";
   }
 
   function renderAsset(){
@@ -1066,8 +1150,8 @@
       var txs2 = monthTx();
       var total = txs2.reduce(function(s,t){ return s+t.amount; }, 0);
       html = detailHead("本月預算", "已使用 " + money(total) + " / " + money(state.budgetLimit));
-      html += '<div class="progress-track" style="margin-bottom:18px;"><div class="progress-fill" style="width:' +
-        Math.min(100, state.budgetLimit>0 ? (total/state.budgetLimit*100) : 0) + '%"></div></div>';
+      var budgetPct = Math.min(100, state.budgetLimit>0 ? (total/state.budgetLimit*100) : 0);
+      html += '<div class="detail-bar"><div class="detail-bar-fill" style="width:' + budgetPct + '%"></div></div>';
       var byCat = {};
       txs2.forEach(function(t){ byCat[t.category] = (byCat[t.category]||0) + t.amount; });
       var cats = Object.keys(byCat);
@@ -1174,14 +1258,28 @@
 
   /* ---------------- Goal edit ---------------- */
   var goalEdit = document.getElementById("goalEdit");
+
+  function openGoalEdit(){
+    goalEdit.classList.add("open");
+    goalEdit.style.height = goalEdit.scrollHeight + "px";
+  }
+  function closeGoalEdit(){
+    goalEdit.style.height = "0px";
+    goalEdit.classList.remove("open");
+  }
+
   document.getElementById("editGoalBtn").addEventListener("click", function(){
+    if (goalEdit.classList.contains("open")){
+      closeGoalEdit();
+      return;
+    }
     document.getElementById("goalNameInput").value = state.goal.name;
     document.getElementById("goalTargetInput").value = state.goal.target;
     document.getElementById("goalCurrentInput").value = state.goal.current;
-    goalEdit.classList.add("open");
+    openGoalEdit();
   });
   document.getElementById("goalCancelBtn").addEventListener("click", function(){
-    goalEdit.classList.remove("open");
+    closeGoalEdit();
   });
   document.getElementById("goalSaveBtn").addEventListener("click", function(){
     var name = document.getElementById("goalNameInput").value.trim();
@@ -1190,7 +1288,7 @@
     if (name) state.goal.name = name;
     if (target >= 0) state.goal.target = target;
     if (current >= 0) state.goal.current = current;
-    goalEdit.classList.remove("open");
+    closeGoalEdit();
     renderAll();
   });
 
