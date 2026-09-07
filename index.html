@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <title>記帳 Wallet</title>
 <style>
   :root{
@@ -35,11 +38,17 @@
     justify-content:center;
     min-height:100vh;
   }
+  /* On phones the app fills the screen, so the desktop preview frame colour
+     would otherwise show through in the status bar area */
+  @media (max-width: 480px){
+    html, body{ background: #ffffff; }
+  }
 
   .phone{
     width:100%;
     max-width:430px;
     min-height:100vh;
+    min-height:100dvh; /* excludes the browser's floating bars where supported */
     background: #ffffff;
     position:relative;
     overflow:hidden;
@@ -258,8 +267,9 @@
     display:block;
   }
   .sheet-content{
-    /* top padding clears the floating handle; content scrolls up beneath it */
-    padding: 44px 22px 60px;
+    /* top padding clears the floating handle; the generous bottom padding lets
+       the last card scroll clear of the browser's floating address bar */
+    padding: 44px 22px calc(130px + env(safe-area-inset-bottom, 0px));
     overflow-y:auto;
     -webkit-overflow-scrolling: touch;
     flex:1;
@@ -1271,6 +1281,15 @@
     computeOffsets();
     goTo(sheetState, false);
   });
+
+  /* In-app browsers show and hide floating bars, which changes the usable
+     height without firing a normal resize event. */
+  if (window.visualViewport){
+    window.visualViewport.addEventListener("resize", function(){
+      computeOffsets();
+      goTo(sheetState, false);
+    });
+  }
 
   /* ---------------- Scroll indicator ---------------- */
   var sheetContentEl = document.getElementById("sheetContent");
