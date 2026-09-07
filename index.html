@@ -231,9 +231,11 @@
     height:100%;
     object-fit: contain;
     object-position: center bottom;
+    background: transparent;
     opacity:0;
-    transition: opacity 3s ease-in-out;
+    transition: opacity .8s ease-in-out;
     will-change: opacity;
+    pointer-events:none;
   }
   .growth-frame.is-visible{ opacity:1; }
   .season-art::after{
@@ -1297,11 +1299,47 @@
   /* ---------------- Background art ---------------- */
   function buildBackground(){
     var art = document.getElementById("seasonArt");
+
+    // Static image shows first and stays as the fallback if the video can't play
     var img = document.createElement("img");
     img.className = "growth-frame is-visible";
     img.src = BACKGROUND_IMAGE;
     img.alt = "";
     art.insertBefore(img, art.firstChild);
+
+    var reduce = window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    var video = document.createElement("video");
+    video.className = "growth-frame";
+    video.muted = true;              // required for autoplay on iOS
+    video.defaultMuted = true;
+    video.loop = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+    video.setAttribute("preload", "auto");
+    video.poster = BACKGROUND_IMAGE;
+
+    ["loop.webm", "loop.mp4"].forEach(function(file){
+      var s = document.createElement("source");
+      s.src = file;
+      s.type = file.indexOf(".webm") > -1 ? "video/webm" : "video/mp4";
+      video.appendChild(s);
+    });
+
+    // Only reveal the video once it can actually play, so there's no white flash
+    video.addEventListener("canplay", function(){
+      video.classList.add("is-visible");
+      img.classList.remove("is-visible");
+    });
+
+    art.insertBefore(video, art.firstChild);
+    var attempt = video.play();
+    if (attempt && attempt.catch) attempt.catch(function(){ /* fall back to image */ });
   }
 
   /* ---------------- Draggable bottom sheet ---------------- */
