@@ -1352,8 +1352,12 @@
     var art = document.getElementById("seasonArt");
     var phoneH = phone.clientHeight;
 
-    // Expanded position: sheet top rises to the top of the trunk artwork
-    var fullTop = art.offsetTop;
+    // Expanded position: sheet top rises just above the greeting, covering it
+    var greeting = document.getElementById("greetingText");
+    var topPanel = document.querySelector(".top-panel");
+    var fullTop = greeting
+      ? topPanel.offsetTop + greeting.offsetTop
+      : art.offsetTop;
     // Peek position: sheet top sits just below the trunk, matching the design gap
     var peekTop = art.offsetTop + art.offsetHeight + 16;
 
