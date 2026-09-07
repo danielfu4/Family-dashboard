@@ -1135,10 +1135,21 @@
     }
   }
 
-  document.getElementById("cardBudget").addEventListener("click", function(){ openDetail("budget"); });
-  document.getElementById("cardSpend").addEventListener("click", function(){ openDetail("spend"); });
-  document.getElementById("cardFixed").addEventListener("click", function(){ openDetail("fixed"); });
-  document.getElementById("cardInvest").addEventListener("click", function(){ openDetail("invest"); });
+  /* While the panel is collapsed, tapping a card opens the panel rather than
+     jumping straight into a detail sheet the user can barely see. */
+  function bindCard(id, kind){
+    document.getElementById(id).addEventListener("click", function(){
+      if (typeof sheetState !== "undefined" && sheetState === "peek"){
+        goTo("full", true);
+        return;
+      }
+      openDetail(kind);
+    });
+  }
+  bindCard("cardBudget", "budget");
+  bindCard("cardSpend", "spend");
+  bindCard("cardFixed", "fixed");
+  bindCard("cardInvest", "invest");
 
   /* ---------------- Net worth quick edit ---------------- */
   document.getElementById("assetAmount").addEventListener("click", function(){
@@ -1209,9 +1220,13 @@
     setSheetY(stateName === "peek" ? peekOffset : fullOffset, animate !== false);
   }
 
+  var dragStartTime = 0;
+  var suppressSheetClickUntil = 0;
+
   handle.addEventListener("pointerdown", function(e){
     dragging = true;
     dragStartY = e.clientY;
+    dragStartTime = Date.now();
     var current = sheetState === "peek" ? peekOffset : fullOffset;
     dragStartTranslate = current;
     handle.setPointerCapture(e.pointerId);
@@ -1225,12 +1240,30 @@
   function endDrag(e){
     if (!dragging) return;
     dragging = false;
+    var moved = Math.abs(e.clientY - dragStartY);
+    var elapsed = Date.now() - dragStartTime;
+
+    // A quick tap with almost no movement toggles the panel instead of dragging it
+    if (moved < 6 && elapsed < 350){
+      suppressSheetClickUntil = Date.now() + 400;
+      goTo(sheetState === "peek" ? "full" : "peek", true);
+      return;
+    }
+
     var current = dragStartTranslate + (e.clientY - dragStartY);
     var mid = (peekOffset + fullOffset) / 2;
     goTo(current < mid ? "full" : "peek", true);
   }
   handle.addEventListener("pointerup", endDrag);
   handle.addEventListener("pointercancel", endDrag);
+
+  // Tapping anywhere on the collapsed panel (except a control) opens it
+  sheet.addEventListener("click", function(e){
+    if (sheetState !== "peek") return;
+    if (Date.now() < suppressSheetClickUntil) return;
+    if (e.target.closest("button, input, select, textarea, a")) return;
+    goTo("full", true);
+  });
 
   window.addEventListener("resize", function(){
     measureDateItems();
