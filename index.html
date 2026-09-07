@@ -276,10 +276,26 @@
     cursor:grab;
     touch-action:none;
     z-index:5;
+    height:31px;
+    box-sizing:content-box;
   }
-  .sheet-handle span{
-    width:36px; height:5px; border-radius:3px; background: var(--ink-faint);
-    display:block;
+  /* Chevron points up while collapsed and flips down once expanded */
+  .handle-arrow{
+    position:absolute;
+    top:16px; left:50%;
+    width:22px; height:12px;
+    transform: translateX(-50%);
+    transition: transform .28s cubic-bezier(.22,.9,.35,1);
+  }
+  .handle-arrow path{
+    fill:none;
+    stroke: var(--ink-faint);
+    stroke-width:2.4;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .sheet.is-expanded .handle-arrow{
+    transform: translateX(-50%) rotate(180deg);
   }
   .sheet-content{
     /* top padding clears the floating handle; the generous bottom padding lets
@@ -619,7 +635,11 @@
   </div>
 
   <section class="sheet" id="sheet">
-    <div class="sheet-handle" id="sheetHandle"><span></span></div>
+    <div class="sheet-handle" id="sheetHandle">
+      <svg class="handle-arrow" viewBox="0 0 22 12" aria-hidden="true">
+        <path d="M2 9 L11 3 L20 9" />
+      </svg>
+    </div>
     <div class="scroll-indicator" id="scrollIndicator"></div>
     <div class="sheet-content" id="sheetContent">
 
@@ -1380,6 +1400,7 @@
 
   function goTo(stateName, animate){
     sheetState = stateName;
+    sheet.classList.toggle("is-expanded", stateName === "full");
     setSheetY(stateName === "peek" ? peekOffset : fullOffset, animate !== false);
   }
 
